@@ -67,7 +67,6 @@ namespace ChessServer
 
             private void ReceiveCallback(IAsyncResult _result)
             {
-                Console.WriteLine("Entered ReceiveCallback.");
                 try
                 {
                     int _byteLength = stream.EndRead(_result);
@@ -157,16 +156,17 @@ namespace ChessServer
             if(Server.lobbyGames.ContainsKey(player.id))
             {
                 Server.lobbyGames.Remove(player.id);
+                ServerSend.RemRoomToAll(player.id);
             }
             if(Server.activeGames.ContainsKey(player.id))
             {
                 Server.activeGames.Remove(player.id);
-                //Send Gameover packet to opponent.
+                ServerSend.SendForfeit(player.enemId);
             }
             if(Server.activeGames.ContainsKey(player.enemId))
             {
                 Server.activeGames.Remove(player.enemId);
-                //Send Gameover packet to opponent.
+                ServerSend.SendForfeit(player.enemId);
             }
 
             player = null;

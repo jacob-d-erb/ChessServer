@@ -62,6 +62,10 @@ namespace ChessServer
                 { (int)ClientPackets.welcomeReceived, ServerHandle.WelcomeReceived},
                 { (int)ClientPackets.hostingGame, ServerHandle.HostingGame},
                 { (int)ClientPackets.joinedGame, ServerHandle.JoinedGame},
+                { (int)ClientPackets.makeMove, ServerHandle.MakeMove},
+                { (int)ClientPackets.endGame, ServerHandle.EndGame},
+                { (int)ClientPackets.forfeit, ServerHandle.Forfeit},
+                { (int)ClientPackets.removeFromLobby, ServerHandle.RemoveFromLobby},
             };
 
             Console.WriteLine("Initialized packets.");

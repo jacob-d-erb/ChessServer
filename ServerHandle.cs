@@ -35,6 +35,7 @@ namespace ChessServer
             {
                 Server.lobbyGames.Add(_fromClient, _gameType);
                 ServerSend.SendRoomToAllExceptOne(_fromClient, _gameType);
+                Console.WriteLine("Player " + _fromClient + " is hosting a game.");
             }
         }
 
@@ -42,6 +43,7 @@ namespace ChessServer
         {
             int _clientIdCheck = _packet.ReadInt();
             int _hostingId = _packet.ReadInt();
+            Console.WriteLine("Handling game joiner.");
             
             if (ConsistencyCheck(_fromClient, _clientIdCheck))
             {
@@ -50,7 +52,82 @@ namespace ChessServer
                 Server.clients[_hostingId].player.enemId = _fromClient;
                 ServerSend.RemRoomToAll(_hostingId);
                 Server.lobbyGames.Remove(_hostingId);
+                ServerSend.SendJoinGame(_hostingId, _fromClient);
             }
+        }
+
+        public static void MakeMove(int _fromClient, Packet _packet)
+        {
+            int _clientIdCheck = _packet.ReadInt();
+            int _startRow = _packet.ReadInt();
+            int _startCol = _packet.ReadInt();
+            int _endRow = _packet.ReadInt();
+            int _endCol = _packet.ReadInt();
+            string _pawnPromote = _packet.ReadString();
+
+            ServerSend.SendMove(Server.clients[_fromClient].player.enemId, _startRow, _startCol, _endRow, _endCol, _pawnPromote);
+
+            Console.WriteLine("Packet containing move has been received.");
+        }
+
+        public static void EndGame(int _fromClient, Packet _packet)
+        {
+            int _clientIdCheck = _packet.ReadInt();
+
+            int opponentId = Server.clients[_fromClient].player.enemId;
+            Server.clients[_fromClient].player.enemId = 0;
+            if(opponentId != 0)
+            {
+                Server.clients[opponentId].player.enemId = 0;
+            }
+
+            if(Server.activeGames.ContainsKey(_fromClient))
+            {
+                Server.activeGames.Remove(_fromClient);
+            }
+            if(Server.activeGames.ContainsKey(opponentId))
+            {
+                Server.activeGames.Remove(opponentId);
+            }
+            Console.WriteLine("Ending game.");
+
+        }
+
+        public static void Forfeit(int _fromClient, Packet _packet)
+        {
+            int _clientIdCheck = _packet.ReadInt();
+            int opponentId = Server.clients[_fromClient].player.enemId;
+            Server.clients[_fromClient].player.enemId = 0;
+            if(opponentId != 0)
+            {
+                Server.clients[opponentId].player.enemId = 0;
+            }
+
+            if(Server.activeGames.ContainsKey(_fromClient))
+            {
+                Server.activeGames.Remove(_fromClient);
+            }
+            if(Server.activeGames.ContainsKey(opponentId))
+            {
+                Server.activeGames.Remove(opponentId);
+            }
+
+            ServerSend.SendForfeit(opponentId);
+            Console.WriteLine("Ending game due to forfeit.");
+
+        }
+
+        public static void RemoveFromLobby(int _fromClient, Packet _packet)
+        {
+            int _clientIdCheck = _packet.ReadInt();
+
+            if(Server.lobbyGames.ContainsKey(_fromClient))
+            {
+                Server.lobbyGames.Remove(_fromClient);
+                ServerSend.RemRoomToAll(_fromClient);
+                Console.WriteLine("Hosted game has been removed.");
+            }
+
         }
 
         public static bool ConsistencyCheck(int _fromClient, int _clientIdCheck)

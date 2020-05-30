@@ -10,8 +10,9 @@ namespace ChessServer
         welcome = 1,
         sendRoom,
         removeRoom,
-        sendGameStart,
-        sendMove
+        sendJoinGame,
+        sendMove,
+        sendForfeit
     }
 
     /// <summary>Sent from client to server.</summary>
@@ -21,7 +22,10 @@ namespace ChessServer
         hostingGame,
         joinedGame,
         makeMove,
-
+        endGame,
+        forfeit,
+        removeFromLobby
+        
     }
 
     public class Packet : IDisposable

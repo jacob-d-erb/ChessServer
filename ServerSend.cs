@@ -75,17 +75,44 @@ namespace ChessServer
                 _packet.Write(_host);
 
                 SendTCPDataToAll(_packet);
+                Console.WriteLine("Packet notifying all players that game has been removed has been sent.");
             }
         }
 
         public static void SendJoinGame(int _host, int _joiner)
         {
-            using (Packet _packet = new Packet((int)ServerPackets.removeRoom))
+            using (Packet _packet = new Packet((int)ServerPackets.sendJoinGame))
             {
                 _packet.Write(_joiner);
                 _packet.Write(Server.clients[_joiner].player.username);
 
                 SendTCPData(_host, _packet);
+                Console.WriteLine("Packet notifying host of game has been sent.");
+            }
+        }
+
+        public static void SendMove(int _recipient, int _startRow, int _startCol, int _endRow, int _endCol, string _pawnPromote)
+        {
+            using (Packet _packet = new Packet((int)ServerPackets.sendMove))
+            {
+                _packet.Write(_startRow);
+                _packet.Write(_startCol);
+                _packet.Write(_endRow);
+                _packet.Write(_endCol);
+                _packet.Write(_pawnPromote);
+
+                SendTCPData(_recipient, _packet);
+                Console.WriteLine("Packet containing move has been sent.");
+            }
+        }
+
+        public static void SendForfeit(int _recipient)
+        {
+            using (Packet _packet = new Packet((int)ServerPackets.sendForfeit))
+            {
+
+                SendTCPData(_recipient, _packet);
+                Console.WriteLine("Packet containing forfeit has been sent.");
             }
         }
     }
